@@ -12,7 +12,6 @@ if [[ ! -f "${setupVars}" ]]; then
 fi
 source "${setupVars}"
 
-echo "iptables -t nat -C POSTROUTING -s ${pivpnNET}/${subnetClass} -o ${IPv4dev} -j MASQUERADE -m comment --comment ${VPN}-nat-rule"
 if iptables -t nat -C POSTROUTING -s "${pivpnNET}/${subnetClass}" -o "${IPv4dev}" -j MASQUERADE -m comment --comment "${VPN}-nat-rule" &> /dev/null; then
   echo ":: [OK] Iptables MASQUERADE rule already set"
 else
@@ -29,7 +28,8 @@ else
   echo ":: [OK] Iptables INPUT rule added"
 fi
 
-if iptables -C FORWARD -s "${pivpnNET}/${subnetClass}" -i "${pivpnDEV}" -o "${IPv4dev}" -j ACCEPT -m comment --comment "${VPN}-forward-rule" &> /dev/null; t>  echo ":: [OK] Iptables FORWARD rule already set"
+if iptables -C FORWARD -s "${pivpnNET}/${subnetClass}" -i "${pivpnDEV}" -o "${IPv4dev}" -j ACCEPT -m comment --comment "${VPN}-forward-rule" &> /dev/null; then
+  echo ":: [OK] Iptables FORWARD rule already set"
 else
   iptables -I FORWARD 1 -d "${pivpnNET}/${subnetClass}" -i "${IPv4dev}" -o "${pivpnDEV}" -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT -m comment --c>  iptables -I FORWARD 2 -s "${pivpnNET}/${subnetClass}" -i "${pivpnDEV}" -o "${IPv4dev}" -j ACCEPT -m comment --comment "${VPN}-forward-rule"
   iptables-save > /etc/iptables/rules.v4
